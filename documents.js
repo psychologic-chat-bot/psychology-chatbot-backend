@@ -6,42 +6,37 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const documentsPath = path.join(__dirname, "documents");
 
 export async function loadDocuments() {
-  try {
-    const files = await fs.readdir(documentsPath);
-    const docs = [];
+  const files = await fs.readdir(documentsPath);
+  const docs = [];
 
-    for (const fileName of files) {
-      const ext = path.extname(fileName).toLowerCase();
-      if (![".txt", ".md", ".json"].includes(ext)) continue;
+  for (const fileName of files) {
+    const ext = path.extname(fileName).toLowerCase();
+    if (![".txt", ".md", ".json"].includes(ext)) continue;
 
-      const content = await fs.readFile(
-        path.join(documentsPath, fileName),
-        "utf-8"
-      );
+    const content = await fs.readFile(
+      path.join(documentsPath, fileName),
+      "utf-8"
+    );
 
-      const id = path.basename(fileName, ext);
-      const audience = ["patient"];
+    const id = path.basename(fileName, ext);
+    const audience = ["patient"];
 
-      const document = {
-        id,
-        title: id.replace(/_/g, " "),
-        audience,
-        content,
-      };
+    const document = {
+      id,
+      title: id.replace(/_/g, " "),
+      audience,
+      content,
+    };
 
-      if (id === "shared_conversation_Valentina") {
-        document.name = "Valentina Gómez";
-        document.sessions = parseSessions(content);
-      }
-
-      docs.push(document);
+    if (id === "shared_conversation_Valentina") {
+      document.name = "Valentina Gómez";
+      document.sessions = parseSessions(content);
     }
 
-    return docs;
-  } catch (error) {
-    console.error("Error loading documents:", error);
-    return [];
+    docs.push(document);
   }
+
+  return docs;
 }
 
 export function listPatients(documents) {
@@ -56,37 +51,6 @@ export function listPatients(documents) {
 
 export function getPatientDocument(documents, patientId) {
   return documents.find((doc) => doc.id === patientId) || null;
-}
-
-export function listDocuments(documents, profileKey) {
-  return listPatients(documents).filter((doc) => doc.audience.includes(profileKey));
-}
-
-export function getRelevantDocuments(documents, profileKey, message) {
-  const lowerMessage = (message || "").toLowerCase();
-  const docsForProfile = documents.filter((doc) =>
-    doc.audience.includes(profileKey)
-  );
-
-  if (!lowerMessage) {
-    return docsForProfile.slice(0, 3);
-  }
-
-  const keywords = lowerMessage
-    .replace(/[^a-z0-9áéíóúñ]+/gi, " ")
-    .split(" ")
-    .filter((token) => token.length > 3);
-
-  const matches = docsForProfile.filter((doc) => {
-    const text = `${doc.title} ${doc.content}`.toLowerCase();
-    return keywords.some((keyword) => text.includes(keyword));
-  });
-
-  if (matches.length > 0) {
-    return matches.slice(0, 3);
-  }
-
-  return docsForProfile.slice(0, 3);
 }
 
 export function buildDocumentContext(documents) {

@@ -415,7 +415,8 @@ app.delete("/chat/:userId/:patientId", (req, res) => {
 });
 
 const port = Number(process.env.PORT) || 3000;
+const host = process.env.HOST || "0.0.0.0";
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server listening on ${host}:${port}`);
 });

@@ -79,7 +79,7 @@ function updateProfileDisplay() {
 
 async function loadPatients() {
   try {
-    const res = await fetch("http://localhost:3000/patients");
+    const res = await fetch("/patients");
     const data = await res.json();
 
     patients = data.patients || [];
@@ -133,7 +133,7 @@ async function loadSessionProgress() {
   try {
     const query = new URLSearchParams({ userId });
     const res = await fetch(
-      `http://localhost:3000/patients/${encodeURIComponent(patientId)}/progress?${query}`
+      `/patients/${encodeURIComponent(patientId)}/progress?${query}`
     );
     const data = await res.json();
 
@@ -221,7 +221,7 @@ async function confirmSessionAction() {
 
   try {
     const res = await fetch(
-      `http://localhost:3000/patients/${encodeURIComponent(patientId)}/${routes[action]}`,
+      `/patients/${encodeURIComponent(patientId)}/${routes[action]}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -293,7 +293,7 @@ async function sendMessage() {
   try {
 
     const res = await fetch(
-      "http://localhost:3000/chat",
+      "/chat",
       {
         method: "POST",
 
