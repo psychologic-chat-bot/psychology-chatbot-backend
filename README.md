@@ -77,8 +77,17 @@ Respuesta:
 conservar el historial y el progreso de sesión; `message` es el texto del
 psicólogo.
 
-Configura en Unity una URL base para el componente cliente (por ejemplo, como
-campo serializado en el Inspector) y úsala para todos los endpoints:
+El cliente `Conexión_Bun` de `Assets/Code` ya consulta `GET /patients` al
+iniciarse y envía los mensajes a `POST /chat`. Añade ese componente a un objeto
+activo de la escena, configura `Base Url` y `Patient Id` en el Inspector, y
+conecta sus eventos `On Reply` y `On Error` a los elementos visuales de Unity.
+Llama `SendMessageToPatient(string)` con el texto del psicólogo; si usas
+`Conexión_Ullama`, asígnale la misma instancia de `Conexión_Bun`. El cliente
+genera y guarda un `userId` por instalación para que el backend conserve el
+historial y el progreso de sesión. El frontend Unity no debe llamar a Ollama
+directamente: el backend administra el modelo, el contexto y la conversación.
+
+Configura `Base Url` según dónde corre Unity:
 
 | Dónde corre Unity | URL base si el backend está en el equipo indicado |
 | --- | --- |

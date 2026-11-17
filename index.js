@@ -26,6 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
   Estructura: conversations[userId][profileKey] = [ historial ]
   Luego puedes usar MongoDB/PostgreSQL
 */
+
 const conversations = {};
 const progressPath = path.join(__dirname, ".data", "session-progress.json");
 
