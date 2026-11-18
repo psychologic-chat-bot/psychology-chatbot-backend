@@ -29,6 +29,14 @@ disponible en `http://localhost:11434`; en Windows normalmente queda en
 ejecución después de iniciar la aplicación de Ollama. Si hace falta, inicia el
 servicio manualmente con `ollama serve`.
 
+## Estructura del backend
+
+- `index.js`: carga la configuración y arranca el servidor.
+- `app.js`: configura Express y conecta las rutas.
+- `routes/`: endpoints de perfiles, pacientes/sesiones y chat.
+- `services/`: lógica de conversación con Ollama y persistencia del progreso.
+- `documents.js` y `profiles.js`: carga de documentos y configuración de perfiles.
+
 ## Configuración opcional
 
 Puedes definir estas variables de entorno para usar otra instancia o modelo:
