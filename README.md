@@ -44,6 +44,12 @@ Puedes definir estas variables de entorno para usar otra instancia o modelo:
 - `OLLAMA_URL`: URL base de Ollama. Por defecto, `http://localhost:11434`.
 - `OLLAMA_MODEL`: nombre del modelo instalado en Ollama. Por defecto,
   `qwen2.5:3b`.
+- `PIPER_EXECUTABLE`: ruta al ejecutable local de Piper. Por defecto,
+  `piper` (debe estar disponible en `PATH`).
+- `PIPER_MODEL`: ruta al modelo de voz Piper en español (`.onnx`). Es necesaria
+  para generar audio en Unity.
+- `PIPER_TIMEOUT_MS`: tiempo máximo de síntesis en milisegundos. Por defecto,
+  `30000`.
 - `HOST`: interfaz de red en la que escucha el backend. Por defecto,
   `0.0.0.0` para permitir conexiones desde Unity en otro dispositivo.
 - `PORT`: puerto HTTP del backend. Por defecto, `3000`.
@@ -52,8 +58,14 @@ Por ejemplo, en PowerShell:
 
 ```powershell
 $env:OLLAMA_MODEL = "llama3.2"
+$env:PIPER_MODEL = "C:\ruta\a\tu\voz-espanol.onnx"
 bun run dev
 ```
+
+Instala Piper y descarga una voz en español compatible desde el catálogo oficial
+de voces de Piper. Configura `PIPER_EXECUTABLE` si el ejecutable no está en
+`PATH`; conserva el archivo `.json` de configuración de la voz junto al modelo
+`.onnx`. Tanto la síntesis como el modelo se ejecutan localmente.
 
 ## Integración con Unity
 
@@ -64,7 +76,8 @@ El backend expone una API HTTP/JSON. Unity debe enviar el texto del psicólogo a
 {
   "userId": "usuario-1",
   "patientId": "shared_conversation_Valentina",
-  "message": "¿Qué te trae hoy a consulta?"
+  "message": "¿Qué te trae hoy a consulta?",
+  "includeAudio": true
 }
 ```
 
@@ -77,6 +90,10 @@ Respuesta:
     "key": "shared_conversation_Valentina",
     "name": "Valentina Gómez"
   },
+  "audio": {
+    "mimeType": "audio/wav",
+    "data": "<audio WAV codificado en base64>"
+  },
   "session": 1
 }
 ```
@@ -84,6 +101,13 @@ Respuesta:
 `patientId` se obtiene de `GET /patients`. Mantén un `userId` estable para
 conservar el historial y el progreso de sesión; `message` es el texto del
 psicólogo.
+
+Unity también solicita que la respuesta del paciente se convierta a WAV. El
+backend necesita Piper y un modelo de voz local en español configurados mediante
+`PIPER_EXECUTABLE` y `PIPER_MODEL`; la respuesta JSON contiene `audio.mimeType`
+y `audio.data` (base64). Si Piper no está instalado o falla, Unity recibe y
+muestra el texto igualmente, y notifica el error de audio en `On Error`. La
+interfaz web solo solicita texto.
 
 El cliente `Conexión_Bun` de `Assets/Code` ya consulta `GET /patients` al
 iniciarse y envía los mensajes a `POST /chat`. Añade ese componente a un objeto

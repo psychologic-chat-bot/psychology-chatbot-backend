@@ -9,7 +9,12 @@ export function createChatRouter({ chatService }) {
 
   router.post("/chat", async (req, res) => {
     try {
-      const { message, userId = "default-user", patientId } = req.body;
+      const {
+        message,
+        userId = "default-user",
+        patientId,
+        includeAudio = false,
+      } = req.body;
 
       if (!message) {
         return res.status(400).json({
@@ -23,7 +28,12 @@ export function createChatRouter({ chatService }) {
         });
       }
 
-      const result = await chatService.sendMessage({ message, userId, patientId });
+      const result = await chatService.sendMessage({
+        message,
+        userId,
+        patientId,
+        includeAudio,
+      });
       res.status(result.status).json(result.body);
     } catch (error) {
       console.error(error);

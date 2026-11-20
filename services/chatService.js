@@ -3,6 +3,7 @@ import {
   buildDocumentContext,
   getPatientDocument,
 } from "../documents.js";
+import { synthesizeSpeech } from "./textToSpeech.js";
 
 export function createChatService({ documents, getCurrentSession }) {
   const conversations = {};
@@ -12,7 +13,12 @@ export function createChatService({ documents, getCurrentSession }) {
   );
   const ollamaModel = process.env.OLLAMA_MODEL || "qwen2.5:3b";
 
-  async function sendMessage({ message, userId, patientId }) {
+  async function sendMessage({
+    message,
+    userId,
+    patientId,
+    includeAudio = false,
+  }) {
     const profile = getProfile("patient");
     const selectedPatient = getPatientDocument(documents, patientId);
 
@@ -90,18 +96,32 @@ export function createChatService({ documents, getCurrentSession }) {
       { role: "assistant", content: reply }
     );
 
+    const body = {
+      reply,
+      profile: {
+        key: selectedPatient.id,
+        name: selectedPatient.name || selectedPatient.title,
+      },
+      session: selectedPatient.sessions
+        ? getCurrentSession(userId, selectedPatient)
+        : undefined,
+    };
+
+    if (includeAudio) {
+      try {
+        const audio = await synthesizeSpeech(reply);
+        body.audio = {
+          mimeType: "audio/wav",
+          data: audio.toString("base64"),
+        };
+      } catch (error) {
+        body.audioError = error.message;
+      }
+    }
+
     return {
       status: 200,
-      body: {
-        reply,
-        profile: {
-          key: selectedPatient.id,
-          name: selectedPatient.name || selectedPatient.title,
-        },
-        session: selectedPatient.sessions
-          ? getCurrentSession(userId, selectedPatient)
-          : undefined,
-      },
+      body,
     };
   }
 
